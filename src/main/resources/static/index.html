@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FinTrack AI</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000;
+  --surface: #121212;
+  --border: #333333;
+  --primary: #FFE600;
+  --primary-dark: #CCA400;
+  --secondary: #00F0FF;
+  --secondary-dark: #0099CC;
+  --danger: #FF0055;
+  --danger-dark: #990033;
+  --warn: #FF8C00;
+  --text: #FFFFFF;
+  --muted: #888888;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  zoom: 0.85;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  min-height: 100vh;
+  background-image: radial-gradient(circle at 50% 0%, #1a1a1a 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* AUTH LAYOUT - SPLIT SCREEN LIVE LANDING */
+.auth-wrap { display: flex; min-height: 100vh; width: 100%; }
+.auth-left {
+  flex: 1.2; background: var(--secondary); border-right: 4px solid #000;
+  display: flex; flex-direction: column; justify-content: center; padding: 60px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-bg-anim {
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(0,0,0,0.1) 40px, rgba(0,0,0,0.1) 80px);
+  animation: bgSlide 20s linear infinite; z-index: 1;
+}
+@keyframes bgSlide { 100% { transform: translate(40px, 40px); } }
+
+.landing-title { font-size: 72px; font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 24px; text-shadow: 6px 6px 0 #000; }
+.landing-sub { font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.9); text-shadow: 2px 2px 0 #000; line-height: 1.5; max-width: 500px; }
+
+/* 3D Animated Floating Card */
+.floating-3d-card {
+  width: 340px; height: 210px; background: linear-gradient(135deg, var(--primary), #FFD700);
+  border: 4px solid #000; border-radius: 20px; margin-top: 60px;
+  box-shadow: 20px 20px 0 rgba(0,0,0,0.6);
+  transform: rotateX(25deg) rotateY(15deg);
+  transform-style: preserve-3d; animation: floatCard 6s ease-in-out infinite;
+  padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+}
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0) rotateX(25deg) rotateY(15deg); box-shadow: 20px 20px 0 rgba(0,0,0,0.6); }
+  50% { transform: translateY(-20px) rotateX(20deg) rotateY(25deg); box-shadow: 30px 30px 0 rgba(0,0,0,0.4); }
+}
+.f-card-header { font-weight: 900; font-size: 26px; color: #000; font-style: italic; }
+.f-card-chip { width: 55px; height: 40px; background: #000; border-radius: 8px; }
+.f-card-number { font-size: 22px; font-weight: 900; color: #000; letter-spacing: 2px; }
+
+.auth-right { flex: 1; display: flex; align-items: center; justify-content: center; background: var(--bg); position: relative; }
+.auth-box {
+  width: 100%; max-width: 460px; padding: 48px; background: var(--surface);
+  border: 2px solid var(--border); box-shadow: 12px 12px 0 var(--primary);
+  border-radius: 24px; position: relative; z-index: 10;
+}
+
+/* FORMS */
+.auth-logo { text-align: center; margin-bottom: 32px; }
+.auth-logo .icon { font-size: 54px; margin-bottom: 8px; filter: drop-shadow(4px 4px 0 var(--primary)); }
+.auth-logo h1 { font-size: 32px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+
+.auth-tabs { display: flex; gap: 8px; margin-bottom: 32px; }
+.auth-tab {
+  flex: 1; padding: 14px; text-align: center; cursor: pointer; border-radius: 12px;
+  font-size: 15px; font-weight: 800; color: var(--muted); border: 2px solid var(--border);
+  transition: all 0.2s;
+}
+.auth-tab.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 4px 4px 0 var(--primary-dark); }
+
+.form-group { margin-bottom: 20px; }
+.form-group label, .fg label { display: block; font-size: 13px; color: var(--text); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+input, select {
+  width: 100%; background: var(--bg); border: 2px solid var(--border); color: var(--text);
+  padding: 16px; border-radius: 12px; font-size: 15px; font-weight: 600;
+  box-shadow: inset 4px 4px 0 rgba(0,0,0,0.5); outline: none; transition: all 0.2s;
+}
+input:focus, select:focus { border-color: var(--primary); box-shadow: inset 4px 4px 0 rgba(0,0,0,0.8), 0 0 0 4px rgba(204,255,0,0.2); }
+
+/* 3D NEUBRUTALIST BUTTONS */
+.btn {
+  width: 100%; padding: 16px; border: 2px solid #000; border-radius: 12px; font-size: 16px; font-weight: 900;
+  cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.btn-primary, .btn-add, .btn-send { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 6px 0 var(--primary-dark); }
+.btn-primary:hover, .btn-add:hover, .btn-send:hover { transform: translateY(2px); box-shadow: 0 4px 0 var(--primary-dark); }
+.btn-primary:active, .btn-add:active, .btn-send:active { transform: translateY(6px); box-shadow: 0 0 0 var(--primary-dark); }
+
+.btn-sm { padding: 10px 16px; font-size: 13px; font-weight: 800; border-radius: 10px; width: auto; border: 2px solid transparent; box-shadow: 0 4px 0 rgba(0,0,0,0.5); }
+.btn-del { background: var(--danger); color: #fff; border-color: var(--danger); box-shadow: 0 4px 0 var(--danger-dark); }
+.btn-del:hover { transform: translateY(2px); box-shadow: 0 2px 0 var(--danger-dark); }
+.btn-del:active { transform: translateY(4px); box-shadow: 0 0 0 var(--danger-dark); }
+
+.auth-err {
+  background: var(--danger); border: 2px solid var(--danger-dark); color: #fff; font-weight: 800;
+  padding: 12px 16px; border-radius: 12px; font-size: 14px; margin-bottom: 20px; box-shadow: 4px 4px 0 var(--danger-dark); display: none;
+}
+
+/* APP LAYOUT - FLOATING PILL SIDEBAR */
+.app-wrap { display: flex; min-height: 100vh; }
+.sidebar {
+  position: fixed; top: 24px; left: 24px; bottom: 24px; width: 280px;
+  background: var(--surface); border: 2px solid var(--border); border-radius: 24px;
+  display: flex; flex-direction: column; box-shadow: 8px 8px 0 var(--border); z-index: 100; overflow: hidden;
+}
+.logo { padding: 32px 24px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.logo-icon { font-size: 32px; filter: drop-shadow(4px 4px 0 var(--primary)); }
+.logo-text { font-size: 24px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: -1px; }
+
+.user-info { padding: 24px; border-bottom: 2px solid var(--border); background: rgba(255,255,255,0.02); }
+.user-name { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+.user-email { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+nav { flex: 1; display: flex; flex-direction: column; padding: 24px 0; }
+.nav-item {
+  padding: 16px 24px; cursor: pointer; color: var(--muted); font-size: 16px; font-weight: 800;
+  border-bottom: 2px solid var(--border); transition: all 0.2s; display: flex; align-items: center; gap: 16px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.nav-item:first-child { border-top: 2px solid var(--border); }
+.nav-item:hover { background: rgba(204, 255, 0, 0.1); color: var(--primary); padding-left: 32px; }
+.nav-item.active { background: var(--primary); color: #000; border-bottom-color: var(--primary-dark); }
+
+.sidebar-footer { padding: 24px; border-top: 2px solid var(--border); }
+.btn-logout {
+  width: 100%; background: var(--danger); color: #fff; border: 2px solid var(--danger);
+  padding: 14px; border-radius: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 0 var(--danger-dark);
+  transition: transform 0.1s, box-shadow 0.1s; text-transform: uppercase;
+}
+.btn-logout:hover { transform: translateY(2px); box-shadow: 0 2px 0 var(--danger-dark); }
+.btn-logout:active { transform: translateY(4px); box-shadow: 0 0 0 var(--danger-dark); }
+
+.main { margin-left: 330px; padding: 40px; width: calc(100% - 330px); }
+.page { display: none; } .page.active { display: block; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: none; } }
+
+.ph { margin-bottom: 40px; }
+.pt { font-size: 42px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; text-shadow: 4px 4px 0 var(--border); }
+.ps { font-size: 16px; color: var(--muted); margin-top: 8px; font-weight: 600; }
+
+/* 3D CARDS & STATS */
+.card, .stat, .chart-box, .bc, .predict-box, .chat-box, .qb {
+  background: var(--surface); border: 2px solid var(--border); border-radius: 20px;
+  box-shadow: 8px 8px 0 var(--border); transition: all 0.2s; padding: 32px;
+}
+.card:hover, .stat:hover, .bc:hover, .predict-box:hover, .qb:hover {
+  border-color: var(--primary); box-shadow: 12px 12px 0 var(--primary-dark); transform: translate(-4px, -4px);
+}
+
+.card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+.stat { position: relative; overflow: hidden; padding: 24px; }
+.stat.s1 { box-shadow: 8px 8px 0 #10b981; } .stat.s1:hover { border-color:#10b981; box-shadow: 12px 12px 0 #059669; }
+.stat.s2 { box-shadow: 8px 8px 0 #f43f5e; } .stat.s2:hover { border-color:#f43f5e; box-shadow: 12px 12px 0 #e11d48; }
+.stat.s3 { box-shadow: 8px 8px 0 var(--secondary); } .stat.s3:hover { border-color:var(--secondary); box-shadow: 12px 12px 0 var(--secondary-dark); }
+.stat.s4 { box-shadow: 8px 8px 0 var(--warn); } .stat.s4:hover { border-color:var(--warn); box-shadow: 12px 12px 0 #d97706; }
+
+.stat-lbl { font-size: 14px; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+.stat-val { font-size: 36px; font-weight: 900; margin: 12px 0 8px; text-shadow: 3px 3px 0 #000; }
+.stat-val.c1 { color: #10b981; }
+.stat-val.c2 { color: #f43f5e; }
+.stat-val.c3 { color: var(--secondary); }
+.stat-val.c4 { color: var(--warn); }
+.stat-sub { font-size: 13px; color: var(--text); font-weight: 600; }
+.stat-icon { position: absolute; right: 16px; bottom: 16px; font-size: 64px; opacity: 0.1; transform: rotate(-10deg); }
+
+/* CHARTS */
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+.chart-title { font-size: 18px; font-weight: 900; text-transform: uppercase; color: var(--text); margin-bottom: 24px; border-bottom: 2px dashed var(--border); padding-bottom: 12px; }
+
+/* ALERTS */
+.alert-box {
+  background: var(--surface); border: 2px solid var(--danger); box-shadow: 6px 6px 0 var(--danger-dark);
+  border-radius: 12px; padding: 16px 24px; margin-bottom: 24px; font-size: 15px; font-weight: 700; color: #fff;
+}
+.alert-warn { border-color: var(--warn); box-shadow: 6px 6px 0 #d97706; color: var(--warn); }
+
+/* FORMS LAYOUT */
+.fg { margin-bottom: 20px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.card > h3 { margin-bottom: 24px !important; font-size: 20px !important; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid var(--border); padding-bottom: 16px; }
+
+/* TABLE */
+.tw { overflow-x: auto; margin-top: 16px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 15px; }
+th { text-align: left; padding: 0 16px 8px; color: var(--muted); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+td { padding: 20px 16px; background: var(--surface); border-top: 2px solid var(--border); border-bottom: 2px solid var(--border); font-weight: 600; }
+td:first-child { border-left: 2px solid var(--border); border-radius: 16px 0 0 16px; }
+td:last-child { border-right: 2px solid var(--border); border-radius: 0 16px 16px 0; }
+tr:hover td { background: #1a1a1a; border-color: var(--primary); }
+.badge { display: inline-flex; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #000; box-shadow: 3px 3px 0 #000; }
+.b-income { background: #10b981; color: #000; }
+.b-expense { background: #f43f5e; color: #fff; }
+
+/* BUDGET CARDS */
+.bg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+.bc { padding: 24px; }
+.bc.alert-card { border-color: var(--warn); box-shadow: 8px 8px 0 #d97706; }
+.bc.over-card { border-color: var(--danger); box-shadow: 8px 8px 0 var(--danger-dark); }
+
+.pb { height: 16px; background: var(--bg); border: 2px solid var(--border); border-radius: 8px; margin: 20px 0 12px; box-shadow: inset 3px 3px 0 rgba(0,0,0,0.5); overflow: hidden; }
+.pf { height: 100%; border-right: 2px solid #000; transition: width 0.5s ease; }
+.p-ok { background: #10b981; }
+.p-warn { background: var(--warn); }
+.p-over { background: var(--danger); }
+
+/* CHAT */
+.chat-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+.chat-box { height: 650px; padding: 0; display: flex; flex-direction: column; }
+.chat-hdr { padding: 20px 24px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 16px; background: #0a0a0a; }
+.chat-av { width: 48px; height: 48px; background: var(--primary); border: 2px solid #000; box-shadow: 4px 4px 0 var(--primary-dark); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.chat-msgs { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; background: var(--bg); }
+.msg { max-width: 80%; padding: 16px 20px; font-weight: 700; font-size: 15px; border: 2px solid var(--border); box-shadow: 4px 4px 0 var(--border); line-height: 1.5; }
+.msg.bot { background: var(--surface); color: var(--text); border-radius: 16px 16px 16px 4px; align-self: flex-start; }
+.msg.user { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 4px 4px 0 var(--primary-dark); border-radius: 16px 16px 4px 16px; align-self: flex-end; }
+.chat-in { padding: 20px; background: #0a0a0a; border-top: 2px solid var(--border); display: flex; gap: 16px; }
+.chat-in input { flex: 1; margin: 0; }
+.btn-send { width: auto; padding: 0 32px; }
+
+.quick-box { display: flex; flex-direction: column; gap: 16px; }
+.qb { padding: 16px 20px; font-size: 14px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.qb:hover { background: var(--primary); color: #000; }
+/* AI FAB */
+.ai-fab {
+  position: fixed; bottom: 40px; right: 40px;
+  background: var(--primary); color: #000; border: 2px solid #000;
+  box-shadow: 8px 8px 0 var(--primary-dark); border-radius: 30px;
+  display: flex; align-items: center; gap: 12px; padding: 16px 24px;
+  cursor: pointer; z-index: 900; transition: all 0.2s;
+  font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+}
+.ai-fab:hover { transform: translate(-4px, -4px); box-shadow: 12px 12px 0 var(--primary-dark); }
+.ai-fab:active { transform: translateY(2px); box-shadow: 4px 4px 0 var(--primary-dark); }
+.ai-fab-icon { font-size: 28px; }
+
+/* PREDICT */
+.predict-box { background: var(--secondary); border-color: #000; box-shadow: 12px 12px 0 var(--secondary-dark); padding: 32px; margin-bottom: 32px; color: #fff; text-align: center; }
+.predict-box h3 { font-size: 24px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; text-shadow: 2px 2px 0 #000; }
+.predict-box p { font-size: 16px; font-weight: 600; }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 40px; right: 40px; background: var(--surface); border: 2px solid #000;
+  padding: 20px 32px; border-radius: 16px; font-size: 16px; font-weight: 800; text-transform: uppercase;
+  transform: translateY(100px); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 999;
+  box-shadow: 8px 8px 0 var(--border);
+}
+#toast.show { transform: none; opacity: 1; }
+#toast.ok { border-color: var(--primary); box-shadow: 8px 8px 0 var(--primary-dark); color: var(--primary); }
+#toast.err { border-color: var(--danger); box-shadow: 8px 8px 0 var(--danger-dark); color: var(--danger); }
+
+/* MISC */
+.typing { display: flex; gap: 6px; align-items: center; padding: 4px 0; }
+.dot { width: 8px; height: 8px; background: var(--muted); border-radius: 50%; animation: bounce 0.8s infinite; }
+.dot:nth-child(2) { animation-delay: 0.15s; } .dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); border-left: 2px solid var(--border); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 0; border: 1px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-section">
+  <div class="auth-wrap">
+    
+    <!-- LEFT SIDE: LIVE LANDING -->
+    <div class="auth-left">
+      <div class="hero-bg-anim"></div>
+      <div style="position:relative; z-index:2;">
+        <h1 class="landing-title">Master Your<br>Wealth.</h1>
+        <p class="landing-sub">FinTrack AI uses advanced neural models to analyze, predict, and optimize your spending in real-time. Join the future of finance.</p>
+        
+        <div class="floating-3d-card">
+          <div class="f-card-header">FinTrack</div>
+          <div class="f-card-chip"></div>
+          <div class="f-card-number">**** **** **** 4092</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: FORM -->
+    <div class="auth-right">
+      <div class="auth-box">
+        <div class="auth-logo">
+          <div class="icon">💰</div>
+          <h1>FinTrack AI</h1>
+          <p style="font-size:13px;color:var(--muted);margin-top:8px;font-weight:700;">SYSTEM READY. INITIALIZE SECURE LOGIN.</p>
+        </div>
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">LOGIN</div>
+          <div class="auth-tab" id="tab-signup" onclick="switchTab('signup')">SIGN UP</div>
+        </div>
+        <div id="auth-err" class="auth-err"></div>
+
+        <!-- Login Form -->
+        <div id="form-login">
+          <div class="form-group"><label>Email Address</label><input id="l-email" type="email" placeholder="you@example.com"/></div>
+          <div class="form-group"><label>Password</label><input id="l-pass" type="password" placeholder="••••••••"/></div>
+          <button class="btn btn-primary" onclick="doLogin()">ACCESS SYSTEM</button>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="form-signup" style="display:none">
+          <div class="form-group"><label>Full Name</label><input id="s-name" type="text" placeholder="John Doe"/></div>
+          <div class="form-group"><label>Email Address</label><input id="s-email" type="email" placeholder="you@example.com"/></div>
+          <div class="form-group"><label>Password</label><input id="s-pass" type="password" placeholder="••••••••"/></div>
+          <div class="form-group"><label>Monthly Income (₹)</label><input id="s-income" type="number" placeholder="50000"/></div>
+          <button class="btn btn-primary" onclick="doSignup()">CREATE SYSTEM ID</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-section" style="display:none">
+<div class="app-wrap">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">💱</div>
+    <div class="logo-text">FinTrack AI</div>
+  </div>
+  <div class="user-info">
+    <div class="user-name" id="sb-name">Loading...</div>
+    <div class="user-email" id="sb-email"></div>
+  </div>
+  <nav>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="ic">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('income',this)"><span class="ic">💚</span> Income</div>
+    <div class="nav-item" onclick="showPage('expenses',this)"><span class="ic">💸</span> Expenses</div>
+    <div class="nav-item" onclick="showPage('budget',this)"><span class="ic">🎯</span> Budget</div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="ph"><div class="pt">Dashboard</div><div class="ps">YOUR COMPLETE FINANCIAL OVERVIEW</div></div>
+    <div id="dash-alerts"></div>
+    <div class="card-grid">
+      <div class="stat s1"><div class="stat-icon">💚</div><div class="stat-lbl">Total Income</div><div class="stat-val c1" id="d-income">₹0</div><div class="stat-sub">All sources</div></div>
+      <div class="stat s2"><div class="stat-icon">🔴</div><div class="stat-lbl">Total Expenses</div><div class="stat-val c2" id="d-expense">₹0</div><div class="stat-sub">All categories</div></div>
+      <div class="stat s3"><div class="stat-icon">⚡</div><div class="stat-lbl">Net Savings</div><div class="stat-val c3" id="d-savings">₹0</div><div class="stat-sub" id="d-rate">Savings rate: 0%</div></div>
+      <div class="stat s4"><div class="stat-icon">📌</div><div class="stat-lbl">Top Expense</div><div class="stat-val c4" id="d-top">—</div><div class="stat-sub" id="d-top-pct">of total spending</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-box"><div class="chart-title">Expense Breakdown</div><canvas id="pieChart" height="200"></canvas></div>
+      <div class="chart-box"><div class="chart-title">Spending Trend</div><canvas id="lineChart" height="200"></canvas></div>
+    </div>
+    <div class="chart-box"><div class="chart-title">Monthly Comparison</div><canvas id="barChart" height="100"></canvas></div>
+  </div>
+
+  <!-- INCOME -->
+  <div id="page-income" class="page">
+    <div class="ph"><div class="pt">Income</div><div class="ps">TRACK ALL YOUR REVENUE STREAMS</div></div>
+    <div class="card" style="margin-bottom:24px;">
+      <h3>Record New Income</h3>
+      <div class="row3">
+        <div class="fg"><label>Source</label>
+          <select id="i-source"><option>Salary</option><option>Freelance</option><option>Passive Income</option><option>Business</option><option>Investment</option><option>Other</option></select>
+        </div>
+        <div class="fg"><label>Amount (₹)</label><input type="number" id="i-amount" placeholder="0"/></div>
+        <div class="fg"><label>Date</label><input type="date" id="i-date"/></div>
+      </div>
+      <div class="fg"><label>Description</label><input type="text" id="i-desc" placeholder="Optional note"/></div>
+      <button class="btn-sm btn-add" onclick="addIncome()">ADD RECORD</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px;">Transaction History</h3>
+      <div class="tw"><table><thead><tr><th>Date</th><th>Source</th><th>Description</th><th>Amount</th><th>Action</th></tr></thead><tbody id="income-table"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div id="page-expenses" class="page">
+    <div class="ph"><div class="pt">Expenses</div><div class="ps">AUTO-CATEGORIZED BY AI NEURAL NETWORK</div></div>
+    <div class="card" style="margin-bottom:24px;">
+      <h3>Record New Expense <span style="font-size:12px;color:var(--primary);font-weight:700;margin-left:12px;">(TRY: "SWIGGY", "UBER", "NETFLIX")</span></h3>
+      <div class="row3">
+        <div class="fg"><label>Category</label>
+          <select id="e-cat"><option>Auto Detect</option><option>Food</option><option>Transport</option><option>Rent</option><option>Entertainment</option><option>Bills</option><option>Health</option><option>Education</option><option>Shopping</option><option>Other</option></select>
+        </div>
+        <div class="fg"><label>Amount (₹)</label><input type="number" id="e-amount" placeholder="0"/></div>
+        <div class="fg"><label>Date</label><input type="date" id="e-date"/></div>
+      </div>
+      <div class="fg"><label>Description (AI Trigger)</label><input type="text" id="e-desc" placeholder='e.g. "Swiggy dinner order" → auto sets Food'/></div>
+      <button class="btn-sm btn-add" onclick="addExpense()">ADD RECORD</button>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px;">Transaction History</h3>
+      <div class="tw"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Action</th></tr></thead><tbody id="expense-table"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- BUDGET -->
+  <div id="page-budget" class="page">
+    <div class="ph"><div class="pt">Budgets</div><div class="ps">SET LIMITS AND RECEIVE SYSTEM ALERTS</div></div>
+    <div id="predict-area"></div>
+    <div class="card" style="margin-bottom:24px;">
+      <h3>Configure Budget Parameter</h3>
+      <div class="row3">
+        <div class="fg"><label>Category</label>
+          <select id="b-cat"><option>Food</option><option>Transport</option><option>Rent</option><option>Entertainment</option><option>Bills</option><option>Health</option><option>Education</option><option>Shopping</option><option>Other</option></select>
+        </div>
+        <div class="fg"><label>Limit (₹)</label><input type="number" id="b-limit" placeholder="5000"/></div>
+        <div class="fg"><label>Month</label>
+          <select id="b-month"><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Year</label><input type="number" id="b-year" style="width:150px" value="2026"/></div>
+      <button class="btn-sm btn-add" onclick="addBudget()">SET LIMIT</button>
+    </div>
+    <div id="budget-grid" class="bg-grid"></div>
+  </div>
+
+  <!-- AI -->
+  <div id="page-ai" class="page">
+    <div class="ph"><div class="pt">AI Advisor</div><div class="ps">POWERED BY GROQ (LLAMA 3.1) — FREE & FAST</div></div>
+    <div class="chat-layout">
+      <div class="chat-box">
+        <div class="chat-hdr">
+          <div class="chat-av">🤖</div>
+          <div><div style="font-weight:900;font-size:16px;letter-spacing:1px;">FINTRACK AI</div><div style="font-size:12px;color:var(--primary);font-weight:700;">● SYSTEM ONLINE</div></div>
+        </div>
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="msg bot">👋 System initialized. I am your AI financial advisor. I have full access to your transaction matrix. How may I assist you today?</div>
+        </div>
+        <div class="chat-in">
+          <input id="chat-inp" type="text" placeholder="QUERY THE SYSTEM..." onkeydown="if(event.key==='Enter')sendChat()"/>
+          <button class="btn btn-send" onclick="sendChat()">EXECUTE</button>
+        </div>
+      </div>
+      <div class="quick-box">
+        <div class="card" style="padding:20px;">
+          <h3 style="font-size:15px !important; margin-bottom:16px !important;">SUGGESTED QUERIES</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div class="qb" onclick="quickChat('Analyse my spending and give 3 saving tips')">📊 Analyse my spending</div>
+            <div class="qb" onclick="quickChat('Which category am I overspending on?')">💸 Where am I overspending?</div>
+            <div class="qb" onclick="quickChat('Am I saving enough? What should my savings rate be?')">💰 Am I saving enough?</div>
+            <div class="qb" onclick="quickChat('Give me a monthly budget plan based on my income and spending')">🎯 Budget recommendation</div>
+            <div class="qb" onclick="quickChat('What expenses can I cut to save more money?')">✂️ What can I cut?</div>
+            <div class="qb" onclick="quickChat('Give me investment advice based on my savings')">📈 Investment ideas</div>
+            <div class="qb" onclick="quickChat('Am I financially healthy? Give me an overall assessment')">🏥 Health check</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI FAB BUTTON -->
+  <div class="ai-fab" onclick="toggleAi()">
+    <div class="ai-fab-icon">🤖</div>
+    <div>AI Advisor</div>
+  </div>
+
+</main>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = '/api';
+let TOKEN = localStorage.getItem('ft_token') || '';
+let USER_NAME = localStorage.getItem('ft_name') || '';
+let USER_EMAIL = localStorage.getItem('ft_email') || '';
+let pieChart=null, lineChart=null, barChart=null;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(TOKEN){ showApp(); }
+  else { document.getElementById('auth-section').style.display='block'; }
+  document.getElementById('i-date').value = today();
+  document.getElementById('e-date').value = today();
+  document.getElementById('b-month').value = new Date().getMonth()+1;
+});
+
+function today(){ return new Date().toISOString().split('T')[0]; }
+const fmt = n => '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function switchTab(t){
+  document.getElementById('form-login').style.display = t==='login'?'block':'none';
+  document.getElementById('form-signup').style.display = t==='signup'?'block':'none';
+  document.getElementById('tab-login').className = 'auth-tab'+(t==='login'?' active':'');
+  document.getElementById('tab-signup').className = 'auth-tab'+(t==='signup'?' active':'');
+  document.getElementById('auth-err').style.display='none';
+}
+
+function showAuthErr(msg){ const e=document.getElementById('auth-err'); e.textContent=msg; e.style.display='block'; }
+
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim();
+  const pass=document.getElementById('l-pass').value;
+  if(!email||!pass){ showAuthErr('Please fill all fields'); return; }
+  try{
+    const r = await fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const d = await r.json();
+    if(!r.ok){ showAuthErr(d.error||'Login failed'); return; }
+    saveAuth(d); showApp();
+  }catch(e){ showAuthErr('Server error. Is Spring Boot running?'); }
+}
+
+async function doSignup(){
+  const name=document.getElementById('s-name').value.trim();
+  const email=document.getElementById('s-email').value.trim();
+  const pass=document.getElementById('s-pass').value;
+  const income=document.getElementById('s-income').value;
+  if(!name||!email||!pass){ showAuthErr('Please fill all fields'); return; }
+  try{
+    const r = await fetch(API+'/auth/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass,monthlyIncome:parseFloat(income)||0})});
+    const d = await r.json();
+    if(!r.ok){ showAuthErr(d.error||'Signup failed'); return; }
+    saveAuth(d); showApp();
+  }catch(e){ showAuthErr('Server error. Is Spring Boot running?'); }
+}
+
+function saveAuth(d){
+  TOKEN=d.token; USER_NAME=d.name; USER_EMAIL=d.email;
+  localStorage.setItem('ft_token',TOKEN);
+  localStorage.setItem('ft_name',USER_NAME);
+  localStorage.setItem('ft_email',USER_EMAIL);
+}
+
+function showApp(){
+  document.getElementById('auth-section').style.display='none';
+  document.getElementById('app-section').style.display='block';
+  document.getElementById('sb-name').textContent=USER_NAME;
+  document.getElementById('sb-email').textContent=USER_EMAIL;
+  loadDashboard();
+}
+
+function logout(){
+  TOKEN=''; localStorage.clear();
+  document.getElementById('app-section').style.display='none';
+  document.getElementById('auth-section').style.display='block';
+}
+
+// ── API HELPER ────────────────────────────────────────────────────────────────
+async function api(path, opts={}){
+  try {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + TOKEN
+    };
+    const config = { ...opts, headers };
+    const r = await fetch(API + path, config);
+    const text = await r.text();
+    if(r.status === 401){ logout(); return null; }
+    if(!r.ok){
+      console.error('API Error:', path, r.status, text);
+      toast('Error: ' + (text.length < 100 ? text : r.status), 'err');
+      return null;
+    }
+    if(!text) return {};
+    try { return JSON.parse(text); }
+    catch(e){ return {}; }
+  } catch(e){
+    console.error('Network error:', path, e);
+    toast('Network error — is Spring Boot running?', 'err');
+    return null;
+  }
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+let lastPage = 'dashboard';
+let lastNavEl = null;
+
+function showPage(name, el){
+  if(!lastNavEl) lastNavEl = document.querySelector('.nav-item.active') || document.querySelector('.nav-item');
+  if(name !== 'ai') { lastPage = name; lastNavEl = el || lastNavEl; }
+  
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  
+  document.getElementById('page-'+name).classList.add('active');
+  if(name !== 'ai' && lastNavEl) lastNavEl.classList.add('active');
+  
+  const loaders = {dashboard:loadDashboard,income:loadIncome,expenses:loadExpenses,budget:loadBudget};
+  if(loaders[name]) loaders[name]();
+}
+
+function toggleAi(){
+  const aiPage = document.getElementById('page-ai');
+  if(aiPage.classList.contains('active')){
+    showPage(lastPage, lastNavEl);
+  } else {
+    showPage('ai', null);
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+type;
+  setTimeout(()=>t.className='',3000);
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+async function loadDashboard(){
+  const [summary,chart,trend,alerts] = await Promise.all([
+    api('/dashboard'), api('/expenses/chart'), api('/expenses/trend'), api('/budgets/alerts')
+  ]);
+  if(!summary) return;
+  document.getElementById('d-income').textContent  = fmt(summary.totalIncome);
+  document.getElementById('d-expense').textContent = fmt(summary.totalExpense);
+  document.getElementById('d-savings').textContent = fmt(summary.savings);
+  document.getElementById('d-rate').textContent    = 'Savings rate: '+summary.savingsRate+'%';
+  document.getElementById('d-top').textContent     = summary.topCategory;
+  document.getElementById('d-top-pct').textContent = summary.topCategoryPct+'% of spending';
+
+  // Alerts
+  const alertDiv = document.getElementById('dash-alerts');
+  alertDiv.innerHTML='';
+  if(alerts && alerts.length){
+    alerts.forEach(a=>{
+      const d=document.createElement('div');
+      d.className='alert-box alert-warn';
+      d.innerHTML=`⚠️ <strong>${a.category}</strong>: Used ${a.percentage.toFixed(0)}% of budget (${fmt(a.spent)} / ${fmt(a.limitAmount)})`;
+      alertDiv.appendChild(d);
+    });
+  }
+
+  // Updated colors to match neon/brutalist theme
+  const colors=['#CCFF00','#9D4EDD','#00E5FF','#FF0055','#FFD60A','#00FF66','#FF00E6','#14b8a6'];
+
+  // Pie Chart
+  if(pieChart) pieChart.destroy();
+  const pc = document.getElementById('pieChart').getContext('2d');
+  pieChart = new Chart(pc,{type:'doughnut',data:{labels:chart.labels,datasets:[{data:chart.values,backgroundColor:colors,borderWidth:2,borderColor:'#121212'}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#888',padding:10,font:{size:12,weight:'bold'}}}}}});
+
+  // Line Chart
+  if(lineChart) lineChart.destroy();
+  const lc = document.getElementById('lineChart').getContext('2d');
+  lineChart = new Chart(lc,{type:'line',data:{labels:trend.months,datasets:[{label:'Monthly Spend',data:trend.amounts,borderColor:'#CCFF00',backgroundColor:'rgba(204,255,0,0.1)',fill:true,tension:.4,pointBackgroundColor:'#CCFF00'}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888',font:{weight:'bold'}}},y:{ticks:{color:'#888',font:{weight:'bold'},callback:v=>'₹'+v}}}}});
+
+  // Bar Chart
+  if(barChart) barChart.destroy();
+  const bc = document.getElementById('barChart').getContext('2d');
+  barChart = new Chart(bc,{type:'bar',data:{labels:trend.months,datasets:[{label:'Monthly Expenses',data:trend.amounts,backgroundColor:'#9D4EDD',borderColor:'#5A189A',borderWidth:2,borderRadius:4}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888',font:{weight:'bold'}}},y:{ticks:{color:'#888',font:{weight:'bold'},callback:v=>'₹'+v}}}}});
+}
+
+// ── INCOME ────────────────────────────────────────────────────────────────────
+async function loadIncome(){
+  const data = await api('/income');
+  if(!data) return;
+  const tb=document.getElementById('income-table'); tb.innerHTML='';
+  if(!data.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px;font-weight:700;">No income added yet. INITIALIZE FIRST ENTRY.</td></tr>'; return; }
+  data.forEach(i=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i.date}</td><td><span class="badge b-income">${i.source}</span></td><td style="color:var(--muted)">${i.description||'—'}</td>
+    <td style="color:#10b981;font-weight:900">+${fmt(i.amount)}</td>
+    <td><button class="btn-sm btn-del" onclick="deleteIncome(${i.id})">DELETE</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+async function addIncome(){
+  const source=document.getElementById('i-source').value;
+  const amount=document.getElementById('i-amount').value;
+  const date=document.getElementById('i-date').value;
+  const desc=document.getElementById('i-desc').value;
+  if(!amount||!date){ toast('Fill amount and date','err'); return; }
+  const result = await api('/income',{method:'POST',body:JSON.stringify({source,amount:parseFloat(amount),date,description:desc})});
+  if(result){ toast('Income added ✓'); document.getElementById('i-amount').value=''; document.getElementById('i-desc').value=''; loadIncome(); }
+}
+
+async function deleteIncome(id){
+  if(!confirm('DELETE THIS RECORD?')) return;
+  await api('/income/'+id,{method:'DELETE'});
+  toast('RECORD PURGED','err'); loadIncome();
+}
+
+// ── EXPENSES ──────────────────────────────────────────────────────────────────
+async function loadExpenses(){
+  const data = await api('/expenses');
+  if(!data) return;
+  const tb=document.getElementById('expense-table'); tb.innerHTML='';
+  if(!data.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px;font-weight:700;">No expenses added yet. INITIALIZE FIRST ENTRY.</td></tr>'; return; }
+  data.forEach(e=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${e.date}</td><td><span class="badge b-expense">${e.category}</span></td><td style="color:var(--muted)">${e.description||'—'}</td>
+    <td style="color:#f43f5e;font-weight:900">-${fmt(e.amount)}</td>
+    <td><button class="btn-sm btn-del" onclick="deleteExpense(${e.id})">DELETE</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+async function addExpense(){
+  const cat=document.getElementById('e-cat').value;
+  const amount=document.getElementById('e-amount').value;
+  const date=document.getElementById('e-date').value;
+  const desc=document.getElementById('e-desc').value;
+  if(!amount||!date){ toast('Fill amount and date','err'); return; }
+  const category = cat==='Auto Detect' ? null : cat;
+  const result = await api('/expenses',{method:'POST',body:JSON.stringify({category,amount:parseFloat(amount),date,description:desc})});
+  if(result){ toast('Expense added ✓'); document.getElementById('e-amount').value=''; document.getElementById('e-desc').value=''; loadExpenses(); }
+}
+
+async function deleteExpense(id){
+  if(!confirm('DELETE THIS RECORD?')) return;
+  await api('/expenses/'+id,{method:'DELETE'});
+  toast('RECORD PURGED','err'); loadExpenses();
+}
+
+// ── BUDGET ────────────────────────────────────────────────────────────────────
+async function loadBudget(){
+  const [budgets,predict] = await Promise.all([api('/budgets'), api('/budgets/predict')]);
+  if(!budgets) return;
+
+  const pa=document.getElementById('predict-area');
+  if(predict && predict.prediction>0){
+    pa.innerHTML=`<div class="predict-box"><h3>🔮 AI EXPENSE PREDICTION</h3>
+    <p>Based on your last ${predict.basedOnMonths} months, estimated next month expense:</p>
+    <div style="font-size:42px;font-weight:900;color:var(--primary);margin-top:16px;text-shadow:4px 4px 0 #000;">${fmt(predict.prediction)}</div></div>`;
+  } else { pa.innerHTML=''; }
+
+  const grid=document.getElementById('budget-grid'); grid.innerHTML='';
+  if(!budgets.length){
+    grid.innerHTML='<p style="color:var(--muted);font-weight:700;">No budgets set yet. Add one above.</p>'; return;
+  }
+  budgets.forEach(b=>{
+    const pct=Math.min(b.percentage,100);
+    const cls = pct>=100?'over-card':pct>=80?'alert-card':'';
+    const pfCls = pct>=100?'p-over':pct>=80?'p-warn':'p-ok';
+    const d=document.createElement('div');
+    d.className='bc '+cls;
+    d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+      <div><div style="font-weight:900;font-size:20px;text-transform:uppercase;">${b.category}</div>
+      <div style="font-size:13px;color:var(--muted);font-weight:700;">${['','JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][b.month]} ${b.year}</div></div>
+      <button class="btn-sm btn-del" onclick="deleteBudget(${b.id})">DELETE</button></div>
+      ${b.exceeded?'<div style="font-size:13px;color:var(--danger);font-weight:900;margin-bottom:4px">🚨 BUDGET EXCEEDED!</div>':''}
+      ${b.alert&&!b.exceeded?'<div style="font-size:13px;color:var(--warn);font-weight:900;margin-bottom:4px">⚠️ 80%+ BUDGET USED</div>':''}
+      <div class="pb"><div class="pf ${pfCls}" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--muted);font-weight:700;">
+        <span>${fmt(b.spent)} SPENT</span><span>${fmt(b.remaining)} LEFT (${b.percentage.toFixed(0)}%)</span>
+      </div>
+      <div style="font-size:14px;color:var(--text);margin-top:8px;font-weight:800;">LIMIT: ${fmt(b.limitAmount)}</div>`;
+    grid.appendChild(d);
+  });
+}
+
+async function addBudget(){
+  const cat=document.getElementById('b-cat').value;
+  const limit=document.getElementById('b-limit').value;
+  const month=document.getElementById('b-month').value;
+  const year=document.getElementById('b-year').value;
+  if(!limit){ toast('Enter limit amount','err'); return; }
+  const result = await api('/budgets',{method:'POST',body:JSON.stringify({category:cat,limitAmount:parseFloat(limit),month:parseInt(month),year:parseInt(year)})});
+  if(result){ toast('Budget set ✓'); document.getElementById('b-limit').value=''; loadBudget(); }
+}
+
+async function deleteBudget(id){
+  await api('/budgets/'+id,{method:'DELETE'});
+  toast('REMOVED','err'); loadBudget();
+}
+
+// ── AI CHAT ───────────────────────────────────────────────────────────────────
+function appendMsg(text,role){
+  const box=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  div.innerHTML=text.replace(/\n/g,'<br/>');
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+  return div;
+}
+
+async function sendChat(){
+  const inp=document.getElementById('chat-inp');
+  const msg=inp.value.trim(); if(!msg) return;
+  inp.value='';
+  appendMsg(msg,'user');
+  const typing=appendMsg('<div class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>','bot');
+  const d=await api('/ai/chat',{method:'POST',body:JSON.stringify({message:msg})});
+  typing.remove();
+  if(d) appendMsg(d.reply,'bot');
+}
+
+function quickChat(msg){ document.getElementById('chat-inp').value=msg; sendChat(); }
+</script>
+</body>
+</html>
